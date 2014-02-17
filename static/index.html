@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <link rel="stylesheet" href="css/twitter.css" type="text/css" media="screen" />
+    <title>Backbone Twitter</title>
+    <style type="text/css">
+        .author{
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Backbone for Twitter</h1>
+    <form id="new-tweet">
+        <label>Author</label><input type="text" name="author" id="author" />
+        <label>Status</label><input type="text" name="status" id="status" />
+        <button>Tweet</button>
+    </form>    
+    <hr />
+    <div id="tweets-container"></div>
+
+    <script type="text/javascript" src="js/underscore-min.js"></script>
+    <script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+    <script type="text/javascript" src="js/backbone-min.js"></script>
+    <script type="text/javascript">
+        //<![CDATA[
+        'use strict';
+        (function($){
+            var Tweet = Backbone.Model.extend({
+                defaults: function(){
+                    return {
+                        author: "",
+                        status: ""
+                    }
+                }
+            });
+            var TweetsList = Backbone.Collection.extend({
+                model: Tweet
+            });
+            var tweets = new TweetsList();
+            var TweetView = Backbone.View.extend({
+                model: new Tweet(),
+                tagName: 'div', //each tweet will create a div
+                initialize: function(){
+                    this.template = _.template($('#tweet-template').html());
+                },
+                events: {
+                    'click .edit': 'edit',
+                    'click .delete': 'delete',
+                    'blur .status': 'close',
+                    'keypress .stauts': 'onEnterUpdate'
+                },
+                edit: function(ev){                    
+                    ev.preventDefault();
+                    this.$('.status').attr('contenteditable', true).focus();
+                },
+                delete: function(ev){
+                    ev.preventDefault();
+                    tweets.remove(this.model);
+                },
+                close: function(ev){
+                    var status = this.$('.status').text();
+                    this.model.set('status', status);
+                    this.$('.status').removeAttr('contenteditable');
+                },
+                onEnterUpdate: function(ev){
+                    if(ev.keycode === "13"){
+                        var self = this;
+                        this.close();
+                        _.delay(function(){
+                            self.$('.status').blur()
+                        }, 100);
+                    }                    
+                },
+                render: function(){
+                    this.$el.html(this.template(this.model.toJSON()));
+                    return this;
+                }
+            });
+            var TweetsView  = Backbone.View.extend({
+                model: tweets,
+                el: $('#tweets-container'),
+                initialize: function(){
+                    this.model.on('add', this.render, this);
+                    this.model.on('remove', this.render, this);
+                },
+                render: function(){
+                    var self = this;
+                    self.$el.html('');
+                    _.each(this.model.toArray(), function(tweet, i){
+                        self.$el.append((new TweetView({model: tweet})).render().$el);
+                    });
+                    return this;
+                }                
+            });
+
+            $(document).ready(function(){
+                $('#new-tweet').on('submit', function(){
+                    var tweet = new Tweet({author: $('#author').val(), status: $('#status').val()});
+                    tweets.add(tweet);
+                    console.log(tweets.toJSON());
+                    return false;
+                });
+
+                var appView = new TweetsView();
+            });
+        })(jQuery);
+        //
+        //var tweets = new TweetsList([tweet1, tweet2, tweet3]);
+        //console.log(tweets.first(2));
+        //console.log(tweets.toJSON()); //not json need to call json.stringafy
+        //]]>
+    </script>
+
+    <!-- Templates are best in script tag (best practice) -->
+    <script type="text/templates" id="tweet-template">
+        <span class="author"><%= author%>:</span>
+        <span class="status"><%= status%>:</span>
+        <a href="#" class="edit">[Edit]</a>
+        <a href="#" class="delete">[Delete]</a>
+    </script>
+</html>

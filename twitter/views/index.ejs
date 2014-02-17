@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <link rel="stylesheet" href="css/twitter.css" type="text/css" media="screen" />
+    <title>Backbone Twitter</title>
+    <style type="text/css">
+        .author{
+            text-decoration: underline;
+        }
+        #tweet-details{
+        	display: none;
+        	position: absolute;
+        	width: 100%;
+        	height: 100%;
+        	background-color: white;
+        	top: 0;
+        	bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Backbone for Twitter</h1>
+    <form id="new-tweet">
+        <label>Author</label><input type="text" name="author" id="author" />
+        <label>Status</label><input type="text" name="status" id="status" />
+        <button>Tweet</button>
+    </form>    
+    <hr />
+    <div id="tweets-container"></div>
+    <div id="tweet-details"></div>
+
+    <script type="text/javascript" src="/javascripts/underscore-min.js"></script>
+    <script type="text/javascript" src="/javascripts/jquery-2.1.0.min.js"></script>
+    <script type="text/javascript" src="/javascripts/backbone-min.js"></script>
+    <script type="text/javascript" src="/javascripts/main.js"></script>
+
+    <!-- Templates -->
+    <script type="text/template" id="tweet-template">
+      <span class="author">{{ author }}:</span>
+      <span class="status">{{ status }}</span>
+      <a href="/tweets/{{ _id }}" class="details">[details]</a>
+      <a href="#" class="edit">[edit]</a>
+      <a href="#" class="delete">[delete]</a>
+    </script>
+
+    <script type="text/template" id="tweet-details-template">
+      <h2 class="status">{{ status }}</h2>
+      <h4 class="author">{{ author }}:</h4>
+      <a href="#" class="back">Back</a>
+    </script>
+</html>
